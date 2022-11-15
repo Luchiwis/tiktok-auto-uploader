@@ -1,0 +1,26 @@
+{
+    "WAIT_HASHTAG_INTERVAL": 1.0,
+    "WAIT_PRESS_UPLOAD": 1,
+    "EXCEL_PATH": "planner.xlsx",
+    "VIDEOS_FOLDER_PATH": ".\\videos",
+    "POSITION_TITLE": {
+        "x": "860",
+        "y": "345"
+    },
+    "POSITION_UPLOAD_FILE": {
+        "x": "598",
+        "y": "568"
+    },
+    "POSITION_PUBLISH": {
+        "x": "1044",
+        "y": "970"
+    },
+    "POSITION_COPYRIGHT_CHECK": {
+        "x": "1079",
+        "y": "796"
+    },
+    "POSITION_PATH": {
+        "x": "375",
+        "y": "446"
+    }
+}

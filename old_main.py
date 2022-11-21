@@ -20,17 +20,20 @@ def get_excel():
     return df
 
 
-def find_next_vid():
+def find_next_vids():
     df = get_excel()
     for i in range(len(df)):
         if df["uploaded"][i] == 0:
-            return df.loc[i]
+            return [df.loc[x] for x in range(i, i+4)]
     return None
 
 
-def set_video_uploaded(object):
+def set_video_uploaded(objects=None):
     df = get_excel()
-    df.loc[object.name, "uploaded"] = 1
+    
+    for v in objects:
+        df.loc[v.name, "uploaded"] = 1
+    
     df.to_excel(EXCEL_NAME, index=False)
 
 
@@ -52,8 +55,8 @@ def copypaste(text):
 
 
 def upload():
-    global next_vid
-    next_vid = find_next_vid()
+    global next_vids
+    next_vids = find_next_vids()
     # pg.moveTo(POSITION_UPLOAD_BUTTON)
     # pg.click()
     # time.sleep(WAIT_PRESS_UPLOAD)
@@ -64,36 +67,30 @@ def upload():
     copypaste(VIDEOS_FOLDER_PATH)
     pg.press("enter")
     pg.press("enter")
-    copypaste(next_vid["path"])
+    copypaste(next_vids["path"])
     pg.press("enter")
     time.sleep(1)
     pg.moveTo(POSITION_TITLE)
     pg.click()
-    copypaste(next_vid["title"])
+    copypaste(next_vids["title"])
     pg.press("space")
-    write_tags(next_vid["hashtags"])
+    write_tags(next_vids["hashtags"])
     pg.moveTo(POSITION_COPYRIGHT_CHECK)
     pg.click()
 
 
 def publish():
-    global next_vid
+    global next_vids
     pg.moveTo(POSITION_PUBLISH)
     pg.click()
-    set_video_uploaded(next_vid)
+    set_video_uploaded(next_vids)
 
+
+######
+def run():
+    upload()
+    publish()
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.geometry("120x70")
-    root.resizable(False, False)
-
-    boton_upload = tk.Button(root, text="Upload", command=upload)
-    boton_upload.config(bg="green", fg="white", font=("helvetica", 12, "bold"))
-    boton_upload.pack()
-
-    boton_publish = tk.Button(root, text=f"Publish", command=publish)
-    boton_publish.config(bg="red", fg="white", font=("helvetica", 12, "bold"))
-    boton_publish.pack()  # mostrar boton de publicar
-
-    root.mainloop()
+    next_vids = find_next_vids()
+    set_video_uploaded(next_vids)

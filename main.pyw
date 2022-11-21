@@ -22,7 +22,9 @@ class App(tk.Tk):
         5. presionar el boton aplicar
         """
 
-        
+        self.TIKTOK_URL = "https://www.tiktok.com/upload?lang=es"
+        self.iterate = 4
+
         #window settings
         self.title("Tiktok Uploader")
         # self.geometry("120x100")
@@ -45,7 +47,7 @@ class App(tk.Tk):
 
     def _create_widgets(self):
         #home widgets
-        self.boton_upload = tk.Button(self, text="Upload", command=self._upload_video)
+        self.boton_upload = tk.Button(self, text="Upload", command=self._upload_videos)
         self.boton_upload.config(bg="green", fg="white", font=("helvetica", 12, "bold"))
 
         #publish
@@ -281,7 +283,6 @@ class App(tk.Tk):
 
             os.mkdir("videos")
 
-
     #tiktok functionality
 
     def copypaste(self, text):
@@ -292,16 +293,17 @@ class App(tk.Tk):
         df = pandas.read_excel(self.EXCEL_PATH)
         return df
     
-    def _find_next_vid(self):
+    def _find_next_vids(self):
         df = self._get_excel()
         for i in range(len(df)):
             if df["uploaded"][i] == 0:
-                return df.loc[i]
+                return [df.loc[x] for x in range(i, i+self.iterate)]
         return None
     
-    def _set_video_uploaded(self, object):
+    def _set_videos_uploaded(self, objects):
         df = self._get_excel()
-        df.loc[object.name, "uploaded"] = 1
+        for v in objects:
+            df.loc[v.name, "uploaded"] = 1
         df.to_excel(self.EXCEL_PATH, index=False)
 
     def _write_tags(self, tags):
@@ -315,30 +317,35 @@ class App(tk.Tk):
             pg.press("enter")
             pg.press("backspace")
     
-    def _upload_video(self):
-        self.next_vid = self._find_next_vid()
-        pg.moveTo(self.POSITION_UPLOAD_FILE)
-        pg.click()
-        time.sleep(1)
-        pg.moveTo(self.POSITION_PATH)
-        self.copypaste(self.VIDEOS_FOLDER_PATH)
-        pg.press("enter")
-        pg.press("enter")
-        self.copypaste(self.next_vid["filename"])
-        pg.press("enter")
-        time.sleep(1)
-        pg.moveTo(self.POSITION_TITLE)
-        pg.click()
-        self.copypaste(self.next_vid["title"])
-        pg.press("space")
-        self._write_tags(self.next_vid["hashtags"])
-        pg.moveTo(self.POSITION_COPYRIGHT_CHECK)
-        pg.click()
+    def _upload_videos(self):
+        #open upload window
+        self.next_vids = self._find_next_vids()
+        for nxt_vd in self.next_vids:
+            os.system(f"start {self.TIKTOK_URL}")
+            time.sleep(5)
+            
+            pg.moveTo(self.POSITION_UPLOAD_FILE)
+            pg.click()
+            time.sleep(1)
+            pg.moveTo(self.POSITION_PATH)
+            self.copypaste(self.VIDEOS_FOLDER_PATH)
+            pg.press("enter")
+            pg.press("enter")
+            self.copypaste(nxt_vd["filename"])
+            pg.press("enter")
+            time.sleep(1)
+            pg.moveTo(self.POSITION_TITLE)
+            pg.click()
+            self.copypaste(nxt_vd["title"])
+            pg.press("space")
+            self._write_tags(nxt_vd["hashtags"])
+            pg.moveTo(self.POSITION_COPYRIGHT_CHECK)
+            pg.click()
     
     def _publish(self):
         pg.moveTo(self.POSITION_PUBLISH)
         pg.click()
-        self._set_video_uploaded(self.next_vid)
+        self._set_videos_uploaded(self.next_vids)
     
     
 
